@@ -75,6 +75,7 @@ https://peppe8o.com/raspberry-pi-zero-pinout/
 On RASPBERRY-Pin
 
 ## As root
+```bash
  passwd
  apt update
  apt upgrade
@@ -99,7 +100,7 @@ comment execute (add to /etc/rc.local to run on every boot):
  usermod -a -G spi,gpio pi
  pip3 install --upgrade --ignore-installed pip setuptools
  pip3 install --upgrade luma.led_matrix
-
+```
 raspi-config navigate to P5 I2C and select <Yes>.
 
     Run sudo raspi-config
