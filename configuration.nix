@@ -1,30 +1,24 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
 { config, pkgs, ... }:
 
 {
   nixpkgs.config.allowUnfree = true;
   imports =
-    [ # Include the results of the hardware scan.
+    [ 
       ./hardware-configuration.nix
     ];
 
-  # Use the GRUB 2 boot loader.
-  boot.loader.grub.enable = true;
-  boot.loader.grub.version = 2;
-  boot.loader.grub.device = "/dev/sda";
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "thinkpad"; # Define your hostname.
-  networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking.hostName = "thinkpad";
+  networking.wireless.enable = true;
+  time.timeZone = "Europe/Berlin";
 
   networking.useDHCP = false;
   networking.interfaces.enp0s25.useDHCP = true;
   networking.interfaces.wlp3s0.useDHCP = true;
   networking.interfaces.wwp0s29u1u4i6.useDHCP = true;
 
-  # Select internationalisation properties.
   i18n.defaultLocale = "de_DE.UTF-8";
   console = {
     font = "Lat2-Terminus16";
@@ -51,18 +45,33 @@ fonts.fonts = with pkgs; [
 	yanone-kaffeesatz
 	lmodern
 ];
-
-  # Set your time zone.
-  time.timeZone = "Europe/Amsterdam";
+  services.xserver.enable = true;
 
   nixpkgs.config.permittedInsecurePackages = [
 	  "xpdf-4.02"
   ];
+  services.xserver.displayManager.defaultSession = "xfce";
+  services.xserver.desktopManager.xfce.enable = true;
+  #services.xserver.windowManager.openbox.enable = true;
+  services.printing.enable = true;
+  services.xserver.desktopManager.xterm.enable = false;
+  services.xserver.layout = "de";
+  services.avahi.nssmdns = true;
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
+  sound.enable = true;
+  hardware.pulseaudio.enable = true;
+  services.xserver.libinput.enable = true;
+
+  users.users.horst = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" ]; 
+  };
+
+
   environment.systemPackages = with pkgs; [
+    alacritty
     arc-theme
+    brave
     dropbox
     evince
     file 
@@ -70,6 +79,7 @@ fonts.fonts = with pkgs; [
     font-manager
     git 
     glxinfo
+    gnumake
     go
     gparted
     htop
@@ -79,30 +89,31 @@ fonts.fonts = with pkgs; [
     keepassxc
     less 
     libreoffice
-usbutils
     lxappearance
-lxmenu-data
+    lxmenu-data
     mc 
+    menumaker
     mtools 
     nix-index
     nixui
     obconf
     openbox
     openbox-menu
-menumaker
-xdgmenumaker
     pandoc
     papirus-icon-theme
     pdftk
-    psutils
-python38
+    python38
+    rofi
     skype
     tectonic 
     texlive.combined.scheme-full
     thunderbird
+    usbutils
     vim 
     vlc
     wget 
+    xdgmenumaker
+    xclip
     xfce.xfce4-battery-plugin
     xfce.xfce4-datetime-plugin
     xfce.xfce4-power-manager
@@ -112,61 +123,8 @@ python38
     zoom-us
   ];
 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  #   pinentryFlavor = "gnome3";
-  # };
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
-  # Enable CUPS to print documents.
-  services.printing.enable = true;
-  services.avahi.enable = true;
-  services.avahi.nssmdns = true;
-
-  # Enable sound.
-  sound.enable = true;
-  hardware.pulseaudio.enable = true;
-
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-  services.xserver.layout = "de";
-  # services.xserver.xkbOptions = "eurosign:e";
-
-  # Enable touchpad support.
-  services.xserver.libinput.enable = true;
-
-  #services.xserver.displayManager.lightdm.enable = true;
-  services.xserver.desktopManager.xfce.enable = true;
-
-  services.xserver.windowManager.openbox.enable = true;
-  services.xserver.displayManager.defaultSession =  "none+openbox";
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-   users.users.horst = {
-     isNormalUser = true;
-     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
-   };
-
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "20.03"; # Did you read the comment?
+  system.stateVersion = "20.09"; # Did you read the comment?
 
 }
