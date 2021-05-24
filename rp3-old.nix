@@ -1,5 +1,25 @@
+# wpa_passphrase NAME SuPErSeCrET > /etc/wpa_supplicant.conf
+# wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
 { config, pkgs, lib, ... }:
 {
+
+nixpkgs.overlays = [
+    (self: super: {
+      firmwareLinuxNonfree = super.firmwareLinuxNonfree.overrideAttrs (old: {
+        version = "2020-12-18";
+        src = pkgs.fetchgit {
+          url =
+            "https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git";
+          rev = "b79d2396bc630bfd9b4058459d3e82d7c3428599";
+          sha256 = "1rb5b3fzxk5bi6kfqp76q1qszivi0v1kdz1cwj2llp5sd9ns03b5";
+        };
+        outputHash = "1p7vn2hfwca6w69jhw5zq70w44ji8mdnibm1z959aalax6ndy146";
+      });
+    })
+  ];
+
+
+
   # NixOS wants to enable GRUB by default
   boot.loader.grub.enable = false;
 
@@ -15,15 +35,13 @@
     gpu_mem=256
   '';
   environment.systemPackages = with pkgs; [
-    raspberrypi-tools
+    libraspberrypi
+    vim
+    git
   ];
-
+  
   # File systems configuration for using the installer's partition layout
   fileSystems = {
-    "/boot" = {
-      device = "/dev/disk/by-label/NIXOS_BOOT";
-      fsType = "vfat";
-    };
     "/" = {
       device = "/dev/disk/by-label/NIXOS_SD";
       fsType = "ext4";
@@ -31,7 +49,7 @@
   };
 
   # Preserve space by sacrificing documentation and history
-  services.nixosManual.enable = false;
+  documentation.nixos.enable = false;
   nix.gc.automatic = true;
   nix.gc.options = "--delete-older-than 30d";
   boot.cleanTmpDir = true;
@@ -43,5 +61,11 @@
   # Use 1GB of additional swap memory in order to not run out of memory
   # when installing lots of things while running other things at the same time.
   swapDevices = [ { device = "/swapfile"; size = 1024; } ];
+
+users.users.pi = {
+  isNormalUser = true;
+  home = "/home/pi";
+  extraGroups = [ "wheel" "networkmanager" ];
+};
 
 }
